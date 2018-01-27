@@ -1,5 +1,6 @@
 # 3350 lab1
-# to compile your project, type make and press enter
+# to compile your project (Windows), type make and press enter
+# to compile your project (Mac), type 'make mac' and press enter
 
 all: lab1Windows
 
