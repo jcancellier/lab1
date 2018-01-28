@@ -42,7 +42,7 @@ using namespace std;
 
 const int MAX_PARTICLES = 2000;
 const float GRAVITY = 0.1;
-
+const int BOXES = 5;
 //some structures
 
 struct Vec {
@@ -63,17 +63,24 @@ struct Particle {
 class Global {
 public:
 	int xres, yres;
-	Shape box;
+	Shape box[BOXES];
 	Particle particle[MAX_PARTICLES];
 	int n;
 	Global() {
 		xres = 800;
 		yres = 600;
 		//define a box shape
-		box.width = 100;
-		box.height = 10;
-		box.center.x = 120 + 5*65;
-		box.center.y = 500 - 5*60;
+		box[0].width = 100;
+		box[0].height = 10;
+		box[0].center.x = 150;
+		box[0].center.y = 500;
+		for(int i = 1; i < BOXES; i++){
+			box[i].width = box[0].width;
+			box[i].height = box[0].height;
+			box[i].center.x = box[i-1].center.x + 55;
+			box[i].center.y = box[i-1].center.y - 60;
+			
+		}
 		n = 0;
 	}
 } g;
@@ -270,15 +277,16 @@ void movement()
 		p->velocity.y -= GRAVITY;
 	
 		//check for collision with shapes...
-		Shape *s = &g.box;
-		if(p->s.center.y < s->center.y + s->height && 
-			    p->s.center.y > s->center.y - s->height &&
-			    p->s.center.x > s->center.x - s->width &&
-			    p->s.center.x < s->center.x + s->width){
-			p->velocity.y = -p->velocity.y;
-			p->velocity.y *= 0.5;
+		for(int i = 0; i < BOXES; i++){
+			Shape *s = &g.box[i];
+			if(p->s.center.y < s->center.y + s->height && 
+			    	p->s.center.y > s->center.y - s->height &&
+			    	p->s.center.x > s->center.x - s->width &&
+			    	p->s.center.x < s->center.x + s->width){
+				p->velocity.y = -p->velocity.y;
+				p->velocity.y *= 0.5;
+			}
 		}
-	
 		//check for off-screen
 		if (p->s.center.y < 0.0) {
 			cout << "off screen" << endl;
@@ -293,22 +301,27 @@ void render()
 	//Draw shapes...
 	//draw a box
 	Shape *s;
-	glColor3ub(90,140,90);
-	s = &g.box;
-	glPushMatrix();
-	glTranslatef(s->center.x, s->center.y, s->center.z);
 	float w, h;
-	w = s->width;
-	h = s->height;
-	glBegin(GL_QUADS);
-		glVertex2i(-w, -h);
-		glVertex2i(-w,  h);
-		glVertex2i( w,  h);
-		glVertex2i( w, -h);
-	glEnd();
-	glPopMatrix();
-	//for(int i = 0; i < 5; i++)
-		makeParticle(s->center.x, s->center.y+50);	
+	glColor3ub(90,140,90);
+	for(int i = 0 ; i < BOXES; i++){
+		s = &g.box[i];
+		glPushMatrix();
+		glTranslatef(s->center.x, s->center.y, s->center.z);
+		
+		w = s->width;
+		h = s->height;
+		//boxes
+		glBegin(GL_QUADS);
+			glVertex2i(-w, -h);
+			glVertex2i(-w,  h);
+			glVertex2i( w,  h);
+			glVertex2i( w, -h);
+		glEnd();
+		glPopMatrix();
+	}
+	s = &g.box[0];
+	for(int i = 0; i < 5; i++)
+		makeParticle(s->center.x+35, s->center.y+80);	
 	for(int i = 0; i < g.n; i++){
 		//Random blue color
 		int red = rand() % 151;	//random R color 0 - 150
