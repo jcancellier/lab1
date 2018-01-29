@@ -40,7 +40,7 @@ using namespace std;
 #include <X11/keysym.h>
 #include <GL/glx.h>
 
-const int MAX_PARTICLES = 2000;
+const int MAX_PARTICLES = 7000;
 const float GRAVITY = 0.1;
 const int BOXES = 5;
 //some structures
@@ -277,8 +277,8 @@ void movement()
 		p->velocity.y -= GRAVITY;
 	
 		//check for collision with shapes...
-		for(int i = 0; i < BOXES; i++){
-			Shape *s = &g.box[i];
+		for(int j = 0; j < BOXES; j++){
+			Shape *s = &g.box[j];
 			if(p->s.center.y < s->center.y + s->height && 
 			    	p->s.center.y > s->center.y - s->height &&
 			    	p->s.center.x > s->center.x - s->width &&
