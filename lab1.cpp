@@ -51,13 +51,14 @@ struct Vec {
 };
 
 struct Color{
-	int x, y, z;
+	int r, g, b;
 };
 
 struct Shape {
 	float width, height;
 	float radius;
 	Vec center;
+	Color color;
 };
 
 struct Particle {
@@ -69,6 +70,7 @@ struct Particle {
 struct Circle{
 	float radius;
 	Vec center;
+	Color color;
 };
 
 class Global {
@@ -88,13 +90,21 @@ public:
 		box[0].height = 10;
 		box[0].center.x = xres * 0.20;
 		box[0].center.y = yres * 0.80;
+		box[0].color.r = 0;
+		box[0].color.g = 0;
+		box[0].color.b = 0;
+
 
 		//Create circle
 		myCircle.radius = 120;
 		myCircle.center.x = 450;
 		myCircle.center.y = -40;
 		myCircle.center.z = 0;
-		
+		myCircle.color.r = 0;
+		myCircle.color.g = 0;
+		myCircle.color.b = 0;
+
+
 		//Create boxes for water to land on
 		for(int i = 1; i < BOXES; i++){
 			box[i].width = box[0].width;
@@ -209,7 +219,7 @@ void init_opengl(void)
 	//Set 2D mode (no perspective)
 	glOrtho(0, g.xres, 0, g.yres, -1, 1);
 	//Set the screen background color
-	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glClearColor(0, 0, 0, 100);
 
 }
 
@@ -226,16 +236,16 @@ void makeParticle(int x, int y)
 	p->velocity.x = (float) rand() / (float)(RAND_MAX) * 1.0 - 0.5;
 	
 	//assign particle's color
-	p->color.x = (rand() % (116 - 90)) + 90;
-	p->color.y = (rand() % (204 - 188)) + 188;
-	p->color.z = (rand() % (244 - 200)) + 200;
+	p->color.r = (rand() % (116 - 90)) + 90;
+	p->color.g = (rand() % (204 - 188)) + 188;
+	p->color.b = (rand() % (244 - 200)) + 200;
 	++g.n;
 }
 
 void drawCircle(){
 	GLint sides = 360;
     	Circle *c = &g.myCircle;
-	glColor3ub(255,51,153);
+	glColor3ub(c->color.r,c->color.g,c->color.b);
 	GLint vertices = sides + 2;
 	GLfloat doublePi = 2.0f * 3.14159;
 	GLfloat circleVerticesX[sides];
@@ -348,7 +358,10 @@ void movement()
 			    	p->s.center.x < s->center.x + s->width){
 				p->velocity.y = -p->velocity.y;
 				p->velocity.y *= 0.55;
-				p->velocity.x += 0.005;	
+				p->velocity.x += 0.005;
+				s->color.r = 3;
+				s->color.g = 180;
+				s->color.b = 120;	
 
 				//force particles to move right
 				if(p->velocity.x < 0)
@@ -368,6 +381,9 @@ void movement()
 			    p->velocity.y = -p->velocity.y;
 			    p->velocity.y *= 0.55;
 			    p->velocity.x -= 0.25;				
+			    g.myCircle.color.r = (g.myCircle.color.r+1)%255;
+			    g.myCircle.color.g = 80;
+			    g.myCircle.color.b = 200;	
 		}
 	}
 }
@@ -380,9 +396,9 @@ void render()
 	//draw a box
 	Shape *s;
 	float w, h;
-	glColor3ub(90,140,90);
 	for(int i = 0 ; i < BOXES; i++){
 		s = &g.box[i];
+		glColor3ub(s->color.r,s->color.g,s->color.b);
 		glPushMatrix();
 		glTranslatef(s->center.x, s->center.y, s->center.z);
 		
@@ -409,7 +425,7 @@ void render()
 		Vec *c = &g.particle[i].s.center;
 		
 		//set particle color
-		glColor3ub(g.particle[i].color.x, g.particle[i].color.y, g.particle[i].color.z );
+		glColor3ub(g.particle[i].color.r, g.particle[i].color.g, g.particle[i].color.b );
 
 		w =
 		h = 2;
