@@ -39,6 +39,7 @@ using namespace std;
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+#include "fonts.h"
 
 const int MAX_PARTICLES = 7000;
 const float GRAVITY = 0.13;
@@ -58,6 +59,12 @@ struct Shape {
 struct Particle {
 	Shape s;
 	Vec velocity;
+	Vec color;
+};
+
+struct Circle{
+	float radius;
+	Vec center;
 };
 
 class Global {
@@ -65,6 +72,7 @@ public:
 	int xres, yres;
 	Shape box[BOXES];
 	Particle particle[MAX_PARTICLES];
+	Circle myCircle;
 	int n;
 	Global() {
 		xres = 500;
@@ -74,6 +82,14 @@ public:
 		box[0].height = 10;
 		box[0].center.x = xres * 0.20;
 		box[0].center.y = yres * 0.80;
+
+		//Circle//////////////
+		myCircle.radius = 120;
+		myCircle.center.x = 450;
+		myCircle.center.y = -40;
+		myCircle.center.z = 0;
+		//////////////////////
+
 		for(int i = 1; i < BOXES; i++){
 			box[i].width = box[0].width;
 			box[i].height = box[0].height;
@@ -178,7 +194,8 @@ int main()
 void init_opengl(void)
 {
 	//OpenGL initialization
-	glViewport(0, 0, g.xres, g.yres);
+	glViewport(0, 0, g.xres, g.yres);	
+	initialize_fonts();
 	//Initialize matrices
 	glMatrixMode(GL_PROJECTION); glLoadIdentity();
 	glMatrixMode(GL_MODELVIEW); glLoadIdentity();
@@ -186,6 +203,7 @@ void init_opengl(void)
 	glOrtho(0, g.xres, 0, g.yres, -1, 1);
 	//Set the screen background color
 	glClearColor(0.1, 0.1, 0.1, 1.0);
+
 }
 
 void makeParticle(int x, int y)
@@ -199,7 +217,45 @@ void makeParticle(int x, int y)
 	p->s.center.y = y;
 	p->velocity.y = (float) rand() / (float)(RAND_MAX) * 1.0;
 	p->velocity.x = (float) rand() / (float)(RAND_MAX) * 1.0 - 0.5;
+	p->color.x = 0;
+	p->color.y = 255;
+	p->color.z = 255;
 	++g.n;
+}
+
+void drawCircle(){
+	GLint sides = 360;
+    	Circle *c = &g.myCircle;
+	glColor3ub(255,51,153);
+	GLint vertices = sides + 2;
+	GLfloat doublePi = 2.0f * 3.14159;
+	GLfloat circleVerticesX[sides];
+	GLfloat circleVerticesY[sides];
+	GLfloat circleVerticesZ[sides];
+
+	circleVerticesX[0] = c->center.x;
+	circleVerticesY[0] = c->center.y;
+	circleVerticesZ[0] = c->center.z;
+
+	for(int i = 1; i < vertices; i++){
+		circleVerticesX[i] = c->center.x + (c->radius * cos(i*doublePi/sides));
+		circleVerticesY[i] = c->center.y + (c->radius * sin(i*doublePi/sides));
+		circleVerticesZ[i] = c->center.z;
+	}
+
+	GLfloat allCircleVertices[vertices * 3];
+	
+	for(int i = 0; i < vertices; i++){
+		allCircleVertices[i * 3] = circleVerticesX[i];
+		allCircleVertices[(i * 3) + 1] = circleVerticesY[i];
+		allCircleVertices[(i * 3) + 2] = circleVerticesZ[i];
+	}
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, allCircleVertices);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, vertices);
+	glDisableClientState(GL_VERTEX_ARRAY);
+
 }
 
 void check_mouse(XEvent *e)
@@ -300,11 +356,24 @@ void movement()
 			cout << "off screen" << endl;
 			g.particle[i] = g.particle[--g.n];
 		}
+
+		//Check collision with circle
+		float dist = sqrt(pow(p->s.center.x - g.myCircle.center.x,2) + pow(p->s.center.y - g.myCircle.center.y,2));
+		if(dist < g.myCircle.radius){
+			    p->velocity.y = -p->velocity.y;
+			    p->velocity.y *= 0.55;
+			    
+			    p->velocity.x -= 0.25;	
+		    	
+				
+		}
 	}
 }
 
 void render()
 {
+	Rect r;
+	glClearColor(1.0,1.0,1.0,1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	//Draw shapes...
 	//draw a box
@@ -332,14 +401,13 @@ void render()
 		makeParticle(s->center.x, s->center.y+50);	
 	for(int i = 0; i < g.n; i++){
 		//Random blue color
-		int red = rand() % 151;	//random R color 0 - 150
-		int green = rand() % 161;	//random G color 0 - 150
 		//Draw the particle here
 		glPushMatrix();
 		
-		glColor3ub(150,160,220);
-		//glColor3ub(red, green, 220);
 		Vec *c = &g.particle[i].s.center;
+		glColor3ub(g.particle[i].color.x, g.particle[i].color.y, g.particle[i].color.z );
+		//glColor3ub(red, green, 220);
+
 		w =
 		h = 2;
 		glBegin(GL_QUADS);
@@ -351,7 +419,108 @@ void render()
 		glPopMatrix();
 	}
 	//
+	//Draw Circle
+	drawCircle();	
 	//Draw your 2D text here
+	//
+	//
+	//
+   unsigned int c= 0;
+   
+    r.bot = g.yres-20;
+    r.left = 10;
+    r.center = 0;
+    //r.centerx = g.box[0].center.x;
+    //r.centery = g.box[0].center.y;
+    ggprint8b(&r,16,c, "Requirements");
+    //----------------Design---------------------------
+/*
+    Rect t;
+    t.bot = 473;
+    t.left = 150 +90;
+    t.center =-100;
+
+    ggprint8b(&t,16,c, "Design");
+    //----------------Coding--------------------------------
+    Rect a;
+    a.bot = 470 -75;
+    a.left = 150 +100 +105;
+    a.center =-100;
+
+    ggprint8b(&a,16,c, "Coding");
+
+    //----------------Testing--------------------------------
+    Rect b;
+    b.bot = 318;
+    b.left = 448;
+    b.center =-100;
+    ggprint8b(&b,16,c, "Testing");
+
+    //----------------Maintenence--------------------------------
+    Rect d;
+    d.bot = 232;
+    d.left = 532;
+    d.center =-100;
+    ggprint8b(&d,16,c, "Maintenence");
+	//
+	//
+*/
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
