@@ -41,7 +41,7 @@ using namespace std;
 #include <GL/glx.h>
 
 const int MAX_PARTICLES = 7000;
-const float GRAVITY = 0.1;
+const float GRAVITY = 0.13;
 const int BOXES = 5;
 //some structures
 
@@ -67,18 +67,18 @@ public:
 	Particle particle[MAX_PARTICLES];
 	int n;
 	Global() {
-		xres = 800;
-		yres = 600;
+		xres = 500;
+		yres = 350;
 		//define a box shape
-		box[0].width = 100;
+		box[0].width = 60;
 		box[0].height = 10;
-		box[0].center.x = 150;
-		box[0].center.y = 500;
+		box[0].center.x = xres * 0.20;
+		box[0].center.y = yres * 0.80;
 		for(int i = 1; i < BOXES; i++){
 			box[i].width = box[0].width;
 			box[i].height = box[0].height;
-			box[i].center.x = box[i-1].center.x + 55;
-			box[i].center.y = box[i-1].center.y - 60;
+			box[i].center.x = box[i-1].center.x + 50;
+			box[i].center.y = box[i-1].center.y - 40;
 			
 		}
 		n = 0;
@@ -275,7 +275,7 @@ void movement()
 		p->s.center.y += p->velocity.y;
 
 		p->velocity.y -= GRAVITY;
-	
+
 		//check for collision with shapes...
 		for(int j = 0; j < BOXES; j++){
 			Shape *s = &g.box[j];
@@ -284,9 +284,17 @@ void movement()
 			    	p->s.center.x > s->center.x - s->width &&
 			    	p->s.center.x < s->center.x + s->width){
 				p->velocity.y = -p->velocity.y;
-				p->velocity.y *= 0.5;
+				p->velocity.y *= 0.55;
+				
+				p->velocity.x += 0.005;	
+				//force particles to move right
+				if(p->velocity.x < 0)
+					p->velocity.x *= -1;
+
 			}
+			
 		}
+
 		//check for off-screen
 		if (p->s.center.y < 0.0) {
 			cout << "off screen" << endl;
@@ -321,7 +329,7 @@ void render()
 	}
 	s = &g.box[0];
 	for(int i = 0; i < 5; i++)
-		makeParticle(s->center.x+35, s->center.y+80);	
+		makeParticle(s->center.x, s->center.y+50);	
 	for(int i = 0; i < g.n; i++){
 		//Random blue color
 		int red = rand() % 151;	//random R color 0 - 150
@@ -329,8 +337,8 @@ void render()
 		//Draw the particle here
 		glPushMatrix();
 		
-		//glColor3ub(150,160,220);
-		glColor3ub(red, green, 220);
+		glColor3ub(150,160,220);
+		//glColor3ub(red, green, 220);
 		Vec *c = &g.particle[i].s.center;
 		w =
 		h = 2;
