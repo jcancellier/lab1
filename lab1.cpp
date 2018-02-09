@@ -44,6 +44,7 @@ using namespace std;
 const int MAX_PARTICLES = 10000;
 const float GRAVITY = 0.13;
 const int BOXES = 5;
+const int SPOKES = 8;
 //some structures
 
 struct Vec {
@@ -73,12 +74,19 @@ struct Circle{
 	Color color;
 };
 
+struct Spoke{
+    	float radius;
+	float angle;
+	Vec center;
+};
+
 class Global {
 public:
 	int xres, yres;
 	Shape box[BOXES];
 	Particle particle[MAX_PARTICLES];
 	Circle myCircle;
+	Spoke mySpokes[SPOKES];
 	int n;
 	Global() {
 	    	//screen resolution
@@ -103,6 +111,15 @@ public:
 		myCircle.color.r = 0;
 		myCircle.color.g = 0;
 		myCircle.color.b = 0;
+
+
+		//Create spoke
+		for(int i=0; i<SPOKES; i++){
+		    mySpokes[i].radius = myCircle.radius;
+		    mySpokes[i].center = myCircle.center;
+		    mySpokes[i].angle = 0 + (360/(2*M_PI)/(SPOKES))*(i);
+		}
+
 
 
 		//Create boxes for water to land on
@@ -181,8 +198,6 @@ void check_mouse(XEvent *e);
 int check_keys(XEvent *e);
 void movement();
 void render();
-
-
 
 //=====================================
 // MAIN FUNCTION IS HERE
@@ -381,9 +396,12 @@ void movement()
 			    p->velocity.y = -p->velocity.y;
 			    p->velocity.y *= 0.55;
 			    p->velocity.x -= 0.25;				
-			    g.myCircle.color.r = (g.myCircle.color.r+1)%255;
+			    g.myCircle.color.r = 160;
 			    g.myCircle.color.g = 80;
-			    g.myCircle.color.b = 200;	
+			    g.myCircle.color.b = 200;
+		    	    for(int i=0; i<SPOKES; i++)
+			    	g.mySpokes[i].angle = g.mySpokes[i].angle+.0001;
+			    	    
 		}
 	}
 }
@@ -451,6 +469,18 @@ void render()
     		r.left = g.box[i].center.x;
     		ggprint8b(&r,16, 0, str[i]);
     	}
+
+	//Draw spoke
+	for(int i=0; i<SPOKES; i++){    
+	    glLineWidth(5);
+	    glColor3f(255,255,255);
+	    glBegin(GL_LINES);
+	    glVertex3f(g.mySpokes[i].center.x, g.mySpokes[i].center.y, 0);
+	    glVertex3f(g.mySpokes[i].center.x + cos(g.mySpokes[i].angle)*g.mySpokes[i].radius,
+		       g.mySpokes[i].center.y + sin(g.mySpokes[i].angle)*g.mySpokes[i].radius, 0);
+	    glEnd();
+	}
+
 }
 
 
