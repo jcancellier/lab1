@@ -102,7 +102,6 @@ public:
 		box[0].color.g = 0;
 		box[0].color.b = 0;
 
-
 		//Create circle
 		myCircle.radius = 120;
 		myCircle.center.x = 450;
@@ -112,15 +111,12 @@ public:
 		myCircle.color.g = 0;
 		myCircle.color.b = 0;
 
-
 		//Create spoke
 		for(int i=0; i<SPOKES; i++){
 		    mySpokes[i].radius = myCircle.radius;
 		    mySpokes[i].center = myCircle.center;
-		    mySpokes[i].angle = 0 + (360/(2*M_PI)/(SPOKES))*(i);
+		    mySpokes[i].angle = 0 + 2*M_PI/(SPOKES)*(i);
 		}
-
-
 
 		//Create boxes for water to land on
 		for(int i = 1; i < BOXES; i++){
