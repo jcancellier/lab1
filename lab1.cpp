@@ -44,7 +44,7 @@ using namespace std;
 const int MAX_PARTICLES = 10000;
 const float GRAVITY = 0.13;
 const int BOXES = 5;
-const int SPOKES = 8;
+const int SPOKES = 16;
 //some structures
 
 struct Vec {
@@ -107,8 +107,8 @@ public:
 		myCircle.center.x = 450;
 		myCircle.center.y = -40;
 		myCircle.center.z = 0;
-		myCircle.color.r = 0;
-		myCircle.color.g = 0;
+		myCircle.color.r = 128;
+		myCircle.color.g = 43;
 		myCircle.color.b = 0;
 
 		//Create spoke
@@ -392,9 +392,6 @@ void movement()
 			    p->velocity.y = -p->velocity.y;
 			    p->velocity.y *= 0.55;
 			    p->velocity.x -= 0.25;				
-			    g.myCircle.color.r = 160;
-			    g.myCircle.color.g = 80;
-			    g.myCircle.color.b = 200;
 		    	    for(int i=0; i<SPOKES; i++)
 			    	g.mySpokes[i].angle = g.mySpokes[i].angle+.0001;
 			    	    
@@ -468,8 +465,8 @@ void render()
 
 	//Draw spoke
 	for(int i=0; i<SPOKES; i++){    
-	    glLineWidth(5);
-	    glColor3f(255,255,255);
+	    glLineWidth(4);
+	    glColor3f(0,0,0);
 	    glBegin(GL_LINES);
 	    glVertex3f(g.mySpokes[i].center.x, g.mySpokes[i].center.y, 0);
 	    glVertex3f(g.mySpokes[i].center.x + cos(g.mySpokes[i].angle)*g.mySpokes[i].radius,
