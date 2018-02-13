@@ -1,5 +1,10 @@
 //
-//modified by: Joshua Cancellier
+/*modified by: Joshua Cancellier
+               Kuljit Singh
+               Fernando Montes De Oca
+               Erik Soto
+               Rafael Noriega
+*/
 //date: 01-25-18
 //
 //3350 Spring 2018 Lab-1
@@ -300,33 +305,6 @@ void check_mouse(XEvent *e)
 	if (e->type == ButtonRelease) {
 		return;
 	}
-	/*
-	if (e->type == ButtonPress) {
-		if (e->xbutton.button==1) {
-			//Left button was pressed
-			int y = g.yres - e->xbutton.y;
-			for(int i = 0; i < 50; i++)
-				makeParticle(e->xbutton.x, y);
-			return;
-		}
-		if (e->xbutton.button==3) {
-			//Right button was pressed
-			return;
-		}
-	}
-	if (e->type == MotionNotify) {
-		//The mouse moved!
-		if (savex != e->xbutton.x || savey != e->xbutton.y) {
-			savex = e->xbutton.x;
-			savey = e->xbutton.y;
-			int y = g.yres - e->xbutton.y;
-			for(int i = 0; i < 10; i++)
-			    	makeParticle(e->xbutton.x, y);
-
-
-		}
-	}
-	*/
 }
 
 int check_keys(XEvent *e)
@@ -393,8 +371,7 @@ void movement()
 			    p->velocity.y *= 0.55;
 			    p->velocity.x -= 0.25;				
 		    	    for(int i=0; i<SPOKES; i++)
-			    	g.mySpokes[i].angle = g.mySpokes[i].angle+.0001;
-			    	    
+			    	g.mySpokes[i].angle = g.mySpokes[i].angle+.0001;			    	    
 		}
 	}
 }
@@ -415,6 +392,7 @@ void render()
 		
 		w = s->width;
 		h = s->height;
+
 		//boxes
 		glBegin(GL_QUADS);
 			glVertex2i(-w, -h);
@@ -475,61 +453,3 @@ void render()
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
